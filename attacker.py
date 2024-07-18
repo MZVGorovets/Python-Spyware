@@ -12,11 +12,13 @@ class Attacker():
 class Main():
     def __init__(self, client_socket):
         self.client_socket = client_socket
-        data = (SuperSocket(self.client_socket).recv_msg()).decode()
-        print(data)
         SuperSocket(self.client_socket).send_msg(("1").encode())
-        data = (SuperSocket(self.client_socket).recv_msg()).decode()
-        print(data)
+        self.operation()
+
+    def operation(self):
+        while True:
+            data = (SuperSocket(self.client_socket).recv_msg()).decode()
+            print(data)
 
 
 class SuperSocket():

@@ -23,31 +23,45 @@ class Server():
 
     def play_client(self, client):
         self.client = client
-        try:
-            Main(self.client)
-        finally:
-            if self.client in TARGET_LIST:
-                TARGET_LIST.remove(self.client)
-            elif self.client in ATTACKER_LIST:
-                ATTACKER_LIST.remove(self.client)
-            else:
-                pass
-            self.client.close()
+        Main(self.client)
 
 
 class Main():
     def __init__(self, client):
         self.client = client
-        SuperSocket(self.client).send_msg(("welcome").encode())
-        data = (SuperSocket(self.client).recv_msg()).decode()
-        if data == "1":
-            ATTACKER_LIST.append(self.client)
-            SuperSocket(self.client).send_msg(("you're an attacker").encode())
-            print(ATTACKER_LIST)
-        else:
-            TARGET_LIST.append(self.client)
-            SuperSocket(self.client).send_msg(("you're a target").encode())
+        try:
+            data = (SuperSocket(self.client).recv_msg()).decode()
+            if data == "1":
+                ATTACKER_LIST.append(self.client)
+            else:
+                TARGET_LIST.append(self.client)
+            print("TARGETS:")
             print(TARGET_LIST)
+            print("ATTACKERS:")
+            print(ATTACKER_LIST)
+            print("----------------------------------------------------------")
+            self.operations()
+        finally:
+            if self.client in TARGET_LIST:
+                TARGET_LIST.remove(self.client)
+                print("closed")
+            else:
+                ATTACKER_LIST.remove(self.client)
+                print("closed attacker")
+            self.client.close()
+
+    def operations(self):
+        while True:
+
+            data = SuperSocket(self.client).recv_msg()
+            try:
+                if self.client in TARGET_LIST:
+                    for socket in ATTACKER_LIST:
+                        SuperSocket(socket).send_msg(data)
+                else:
+                    pass
+            except:
+                pass
 
 
 class SuperSocket():

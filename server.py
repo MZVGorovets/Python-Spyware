@@ -3,27 +3,51 @@ import threading
 import struct
 
 
+ATTACKER_LIST = []
+TARGET_LIST = []
+ATTACKER_TO_TARGET = {}
+TARGET_TO_ATTACKETS = {}
+
+
 class Server():
     def __init__(self):
         self.server_socket = socket.socket()
-        self.server_socket.bind(('0.0.0.0', 8000))
+        self.server_socket.bind(("0.0.0.0", 8000))
         self.server_socket.listen(100)
         print("Listening for clients...")
 
         while True:
             client, address = self.server_socket.accept()
             threading.Thread(target=self.play_client,
-                             args=(client)).start()
+                             args=(client,)).start()
 
     def play_client(self, client):
-        Main(client)
+        self.client = client
+        try:
+            Main(self.client)
+        finally:
+            if self.client in TARGET_LIST:
+                TARGET_LIST.remove(self.client)
+            elif self.client in ATTACKER_LIST:
+                ATTACKER_LIST.remove(self.client)
+            else:
+                pass
+            self.client.close()
 
 
 class Main():
     def __init__(self, client):
         self.client = client
-        send_recv_socket = SuperSocket(self.client)
-        send_recv_socket.send_msg(("welcome").encode())
+        SuperSocket(self.client).send_msg(("welcome").encode())
+        data = (SuperSocket(self.client).recv_msg()).decode()
+        if data == "1":
+            ATTACKER_LIST.append(self.client)
+            SuperSocket(self.client).send_msg(("you're an attacker").encode())
+            print(ATTACKER_LIST)
+        else:
+            TARGET_LIST.append(self.client)
+            SuperSocket(self.client).send_msg(("you're a target").encode())
+            print(TARGET_LIST)
 
 
 class SuperSocket():

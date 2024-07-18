@@ -6,13 +6,16 @@ class Target():
     def __init__(self):
         self.client_socket = socket.socket()
         self.client_socket.connect(("127.0.0.1", 8000))
+        Main(self.client_socket)
 
 
 class Main():
     def __init__(self, client_socket):
         self.client_socket = client_socket
-        send_recv_socket = SuperSocket(self.client_socket)
-        data = (send_recv_socket.recv_msg()).decode()
+        data = (SuperSocket(self.client_socket).recv_msg()).decode()
+        print(data)
+        SuperSocket(self.client_socket).send_msg(("0").encode())
+        data = (SuperSocket(self.client_socket).recv_msg()).decode()
         print(data)
 
 

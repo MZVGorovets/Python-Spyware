@@ -1,5 +1,6 @@
 import socket
 import struct
+import json
 
 
 class Attacker():
@@ -18,8 +19,13 @@ class Main():
     def operation(self):
         while True:
             data = (SuperSocket(self.client_socket).recv_msg()).decode()
-            print(data)
-
+            message = json.loads(data)
+            
+            if message["type"] == "logger":
+                print(message["data"])
+                
+            else:
+                print("wrong")
 
 class SuperSocket():
     def __init__(self, current_socket):  # make the self.current_socket euqal to current_socket

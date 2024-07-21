@@ -45,9 +45,19 @@ class Main():
             if self.client in TARGET_LIST:
                 TARGET_LIST.remove(self.client)
                 print("closed")
+                print("TARGETS:")
+                print(TARGET_LIST)
+                print("ATTACKERS:")
+                print(ATTACKER_LIST)
+                print("----------------------------------------------------------")
             else:
                 ATTACKER_LIST.remove(self.client)
                 print("closed attacker")
+                print("TARGETS:")
+                print(TARGET_LIST)
+                print("ATTACKERS:")
+                print(ATTACKER_LIST)
+                print("----------------------------------------------------------")
             self.client.close()
 
     def operations(self):
@@ -57,6 +67,10 @@ class Main():
             try:
                 if self.client in TARGET_LIST:
                     for socket in ATTACKER_LIST:
+                        SuperSocket(socket).send_msg(data)
+                        
+                elif self.client in ATTACKER_LIST:
+                    for socket in TARGET_LIST:
                         SuperSocket(socket).send_msg(data)
                 else:
                     pass

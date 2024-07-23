@@ -10,6 +10,7 @@ from mss import mss
 import base64
 import pyautogui
 import os
+import sys
 
 
 WIDTH = 1900
@@ -194,4 +195,26 @@ class SuperSocket():
 
 
 if __name__ == '__main__':
-    Target()
+    try:
+        if len(sys.argv) == 2:
+            try:
+                if "." in sys.argv[1]:
+                    Target(sys.argv[1], 2000)
+
+                elif int(sys.argv[1]) <= 65535 and int(sys.argv[1]) >= 1000:
+                    Target("127.0.0.1", int(sys.argv[1]))
+
+                raise ValueError
+            except (ValueError, TypeError):
+                Target("127.0.0.1", 2000)
+
+        elif len(sys.argv) == 3:
+            try:
+                if int(sys.argv[2]) <= 65535 and int(sys.argv[2]) >= 1000:
+                    Target(sys.argv[1], int(sys.argv[2]))
+                raise ValueError
+            except (ValueError, TypeError):
+                Target("127.0.0.1", 2000)
+        raise ValueError
+    except (ValueError, TypeError):
+        Target("127.0.0.1", 2000)

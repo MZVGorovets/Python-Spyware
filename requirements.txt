@@ -1,0 +1,30 @@
+server:
+pip install sounddevice
+
+pip install soundfile
+
+pip install numpy
+
+pip install cryptography
+
+pip install pycryptodome
+
+
+
+
+
+client:
+
+pip install sounddevice
+
+pip install soundfile
+
+pip install numpy
+
+pip install cryptography
+
+pip3 install customtkinter
+
+pip install Pillow
+
+pip install pycryptodome

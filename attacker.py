@@ -8,6 +8,7 @@ import customtkinter
 import tkinter as tk
 from tkinter import messagebox
 import threading
+import sys
 
 
 WIDTH = 1900
@@ -303,4 +304,26 @@ class SuperSocket():
 
 
 if __name__ == '__main__':
-    Attacker()
+    try:
+        if len(sys.argv) == 2:
+            try:
+                if "." in sys.argv[1]:
+                    Attacker(sys.argv[1], 2000)
+
+                elif int(sys.argv[1]) <= 65535 and int(sys.argv[1]) >= 1000:
+                    Attacker("127.0.0.1", int(sys.argv[1]))
+
+                raise ValueError
+            except (ValueError, TypeError):
+                Attacker("127.0.0.1", 2000)
+
+        elif len(sys.argv) == 3:
+            try:
+                if int(sys.argv[2]) <= 65535 and int(sys.argv[2]) >= 1000:
+                    Attacker(sys.argv[1], int(sys.argv[2]))
+                raise ValueError
+            except (ValueError, TypeError):
+                Attacker("127.0.0.1", 2000)
+        raise ValueError
+    except (ValueError, TypeError):
+        Attacker("127.0.0.1", 2000)

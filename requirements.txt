@@ -1,30 +1,16 @@
-server:
-pip install sounddevice
+Target:
 
-pip install soundfile
+pip install pynput
 
-pip install numpy
+pip install mss
 
-pip install cryptography
-
-pip install pycryptodome
+pip install PyAutoGUI
 
 
 
 
+Attcker:
 
-client:
-
-pip install sounddevice
-
-pip install soundfile
-
-pip install numpy
-
-pip install cryptography
+pip install pygame
 
 pip3 install customtkinter
-
-pip install Pillow
-
-pip install pycryptodome

@@ -18,9 +18,9 @@ HEIGHT = 1000
 
 
 class Target():
-    def __init__(self):
+    def __init__(self, IP, Port):
         self.client_socket = socket.socket()
-        self.client_socket.connect(("127.0.0.1", 8000))
+        self.client_socket.connect((IP, Port))
         Main(self.client_socket)
 
 

